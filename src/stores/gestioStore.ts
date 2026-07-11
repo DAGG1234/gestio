@@ -11,11 +11,11 @@ export interface IMovimiento {
 }
 
 export const useGestioStore = defineStore('gestio', () => {
-    // 1. Historial RECIENTE (Se limpia con el botón)
+    // 1. Historial de pantalla (SE LIMPIA al darle al botón)
     const savedReciente = localStorage.getItem('gestio_reciente');
     const historial = ref<IMovimiento[]>(savedReciente ? JSON.parse(savedReciente) : []);
     
-    // 2. Historial TOTAL (Se mantiene para cálculos y auditoría)
+    // 2. Historial TOTAL (NUNCA SE LIMPIA, alimenta saldo, gráfica y auditoría)
     const savedTotal = localStorage.getItem('gestio_total');
     const historialTotal = ref<IMovimiento[]>(savedTotal ? JSON.parse(savedTotal) : []);
     
@@ -43,13 +43,13 @@ export const useGestioStore = defineStore('gestio', () => {
         sincronizar(); 
     }
 
-    // AHORA: Solo limpia el historial de pantalla
+    // AHORA: Solo limpia el historial de pantalla, el total permanece intacto
     function limpiarHistorial() {
         historial.value = [];
         sincronizar(); 
     }
 
-    // Auditoría basada en historialTotal (No se borra)
+    // Auditoría basada en el historial TOTAL (No se pierde al limpiar pantalla)
     const auditoria = computed(() => {
         const egresos = historialTotal.value.filter(m => m.tipo === 'Egreso');
         if (egresos.length === 0) return "¡Empecemos! Registra tu primer gasto para ver tu salud financiera.";
@@ -92,7 +92,7 @@ export const useGestioStore = defineStore('gestio', () => {
         return filtrado;
     });
 
-    // Cálculos basados en historialTotal (No se borran)
+    // CÁLCULOS GLOBALES (Leen del Total, por lo tanto no se borran al limpiar pantalla)
     const totalIngresos = computed(() => historialTotal.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresos = computed(() => historialTotal.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
     const saldo = computed(() => totalIngresos.value - totalEgresos.value);
@@ -103,7 +103,7 @@ export const useGestioStore = defineStore('gestio', () => {
 
     return {
         historial,
-        historialTotal, // Se incluye por si lo necesitas en algún componente
+        historialTotal,
         filtroTipo,
         filtroCategoria,
         filtroTiempo,
