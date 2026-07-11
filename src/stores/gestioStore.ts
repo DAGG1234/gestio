@@ -25,6 +25,7 @@ export const useGestioStore = defineStore('gestio', () => {
     // Estado para notificaciones
     const mensajeNotificacion = ref<string | null>(null);
 
+    // Filtros
     const filtroTipo = ref('Todos');
     const filtroCategoria = ref('Todas');
     const filtroTiempo = ref('Todo');
@@ -73,7 +74,7 @@ export const useGestioStore = defineStore('gestio', () => {
     const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
     const saldo = computed(() => totalIngresos.value - totalEgresos.value);
 
-    // Lógica de filtrado
+    // Lógica de filtrado avanzada
     const historialFiltrado = computed(() => {
         let filtrado = historial.value;
 
@@ -99,7 +100,7 @@ export const useGestioStore = defineStore('gestio', () => {
     const totalIngresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
 
-    // Auditoría mejorada
+    // Auditoría
     const auditoria = computed(() => {
         const egresos = historial.value.filter(m => m.tipo === 'Egreso');
         if (egresos.length === 0) return { titulo: "¡Todo listo!", mensaje: "Registra tu primer gasto.", emoji: "🚀" };
