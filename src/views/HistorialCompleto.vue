@@ -120,32 +120,28 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
                 </section>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-4">Fecha</th>
-                            <th class="p-4">Categoría</th>
-                            <th class="p-4">Descripción</th>
-                            <th class="p-4 text-right">Ingreso</th>
-                            <th class="p-4 text-right">Egreso</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        <tr v-for="mov in store.historialFiltrado" :key="mov.id">
-                            <td class="p-4 text-gray-500 whitespace-nowrap">{{ new
-                                Date(mov.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) }}
-                            </td>
-                            <td class="p-4 font-medium">{{ mov.categoria }}</td>
-                            <td class="p-4 text-gray-600">{{ mov.descripcion }}</td>
-                            <td class="p-4 text-right text-[#0332fd] font-bold">{{ mov.tipo === 'Ingreso' ?
-                                mov.monto.toFixed(2) : '' }}</td>
-                            <td class="p-4 text-right text-red-500 font-bold">{{ mov.tipo === 'Egreso' ?
-                                mov.monto.toFixed(2) : '' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto max-h-125 overflow-y-auto custom-scrollbar">
+    <table class="w-full text-left text-sm">
+        <thead class="bg-gray-50 text-gray-400 text-xs uppercase sticky top-0 z-10">
+            <tr>
+                <th class="p-4">Fecha</th>
+                <th class="p-4">Categoría</th>
+                <th class="p-4">Descripción</th>
+                <th class="p-4 text-right">Ingreso</th>
+                <th class="p-4 text-right">Egreso</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            <tr v-for="mov in store.historialFiltrado" :key="mov.id">
+                <td class="p-4 text-gray-500 whitespace-nowrap">{{ new Date(mov.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) }}</td>
+                <td class="p-4 font-medium">{{ mov.categoria }}</td>
+                <td class="p-4 text-gray-600">{{ mov.descripcion }}</td>
+                <td class="p-4 text-right text-[#0332fd] font-bold">{{ mov.tipo === 'Ingreso' ? mov.monto.toFixed(2) : '' }}</td>
+                <td class="p-4 text-right text-red-500 font-bold">{{ mov.tipo === 'Egreso' ? mov.monto.toFixed(2) : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
         </main>
     </div>
 </template>

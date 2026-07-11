@@ -165,7 +165,13 @@ const ejecutarAccion = () => {
                         <TrashIcon class="w-4 h-4" /> Limpiar todo
                     </button>
                 </div>
-                <div class="space-y-3">
+
+                <div <div
+                    class="space-y-3 max-h-100 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                    <div v-if="store.historial.length === 0" class="text-center py-10 text-gray-400">
+                        No hay movimientos recientes
+                    </div>
+
                     <div v-for="mov in store.historial" :key="mov.id"
                         class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                         <div>
@@ -173,7 +179,7 @@ const ejecutarAccion = () => {
                             <p class="text-xs text-gray-400">{{ mov.categoria }}</p>
                         </div>
                         <span :class="mov.tipo === 'Ingreso' ? 'text-[#0332fd]' : 'text-red-500'" class="font-bold">
-                            Bs. {{ mov.monto.toFixed(2) }}
+                            {{ mov.tipo === 'Ingreso' ? '+' : '-' }} Bs. {{ mov.monto.toFixed(2) }}
                         </span>
                     </div>
                 </div>
