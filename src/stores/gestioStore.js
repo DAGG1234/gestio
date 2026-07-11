@@ -1,0 +1,87 @@
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue'; // ¡Listo! Problema resuelto
+export const useGestioStore = defineStore('gestio', () => {
+    // ESTADO
+    // 1. Cargamos desde localStorage al iniciar, o iniciamos vacío
+    const saved = localStorage.getItem('gestio_historial');
+    const historial = ref(saved ? JSON.parse(saved) : []);
+    const filtroTipo = ref('Todos');
+    const filtroCategoria = ref('Todas');
+    const filtroTiempo = ref('Todo');
+    // FUNCIÓN AUXILIAR DE PERSISTENCIA
+    function sincronizar() {
+        localStorage.setItem('gestio_historial', JSON.stringify(historial.value));
+    }
+    // ACCIONES
+    function agregarMovimiento(tipo, categoria, descripcion, monto) {
+        historial.value.push({
+            id: Date.now(),
+            tipo,
+            categoria,
+            descripcion,
+            monto,
+            fecha: new Date().toISOString()
+        });
+        sincronizar(); // Guardamos cada vez que agregamos
+    }
+    function limpiarHistorial() {
+        historial.value = [];
+        sincronizar(); // Guardamos después de limpiar
+    }
+    // COMPUTED: AUDITORÍA
+    const auditoria = computed(() => {
+        const egresos = historial.value.filter(m => m.tipo === 'Egreso');
+        if (egresos.length === 0)
+            return "¡Empecemos! Registra tu primer gasto para ver tu salud financiera.";
+        const maxGasto = egresos.reduce((prev, current) => (prev.monto > current.monto) ? prev : current);
+        if (totalIngresos.value > 0 && maxGasto.monto > (totalIngresos.value * 0.4)) {
+            return `¡Cuidado! Tu mayor gasto fue en ${maxGasto.categoria} (Bs. ${maxGasto.monto}). Representa más del 40% de tus ingresos.`;
+        }
+        return "Vas por buen camino. Tus gastos están distribuidos de forma saludable.";
+    });
+    // COMPUTED: FILTRADO
+    const historialFiltrado = computed(() => {
+        let filtrado = historial.value;
+        if (filtroTipo.value !== 'Todos') {
+            filtrado = filtrado.filter(m => m.tipo === filtroTipo.value);
+        }
+        if (filtroCategoria.value !== 'Todas') {
+            filtrado = filtrado.filter(m => m.categoria === filtroCategoria.value);
+        }
+        const hoy = new Date();
+        if (filtroTiempo.value === 'Hoy') {
+            filtrado = filtrado.filter(m => new Date(m.fecha).toDateString() === hoy.toDateString());
+        }
+        else if (filtroTiempo.value === 'Semana') {
+            const sieteDiasAtras = new Date();
+            sieteDiasAtras.setDate(hoy.getDate() - 7);
+            filtrado = filtrado.filter(m => new Date(m.fecha) >= sieteDiasAtras);
+        }
+        else if (filtroTiempo.value === 'Mes') {
+            filtrado = filtrado.filter(m => new Date(m.fecha).getMonth() === hoy.getMonth() &&
+                new Date(m.fecha).getFullYear() === hoy.getFullYear());
+        }
+        return filtrado;
+    });
+    // COMPUTED: TOTALES
+    const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
+    const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
+    const saldo = computed(() => totalIngresos.value - totalEgresos.value);
+    const totalIngresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
+    const totalEgresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
+    return {
+        historial,
+        filtroTipo,
+        filtroCategoria,
+        filtroTiempo,
+        agregarMovimiento,
+        limpiarHistorial,
+        auditoria,
+        historialFiltrado,
+        totalIngresos,
+        totalEgresos,
+        saldo,
+        totalIngresosFiltrados,
+        totalEgresosFiltrados
+    };
+});
