@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed } from 'vue'; 
 
 export interface IMovimiento {
     id: number;
@@ -10,9 +10,20 @@ export interface IMovimiento {
     fecha: string;
 }
 
+// Función auxiliar para formato de moneda venezolana
+export const formatearBs = (monto: number) => {
+    return new Intl.NumberFormat('es-VE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(monto) + ' Bs.';
+};
+
 export const useGestioStore = defineStore('gestio', () => {
     const saved = localStorage.getItem('gestio_historial');
     const historial = ref<IMovimiento[]>(saved ? JSON.parse(saved) : []);
+    
+    // Estado para notificaciones
+    const mensajeNotificacion = ref<string | null>(null);
 
     const filtroTipo = ref('Todos');
     const filtroCategoria = ref('Todas');
@@ -22,7 +33,22 @@ export const useGestioStore = defineStore('gestio', () => {
         localStorage.setItem('gestio_historial', JSON.stringify(historial.value));
     }
 
+    function mostrarNotificacion(msg: string) {
+        mensajeNotificacion.value = msg;
+        setTimeout(() => { mensajeNotificacion.value = null; }, 3000);
+    }
+
     function agregarMovimiento(tipo: 'Ingreso' | 'Egreso', categoria: string, descripcion: string, monto: number) {
+        if (monto > 100000000) {
+            mostrarNotificacion("Error: Monto demasiado alto.");
+            return;
+        }
+
+        if (tipo === 'Egreso' && monto > saldo.value) {
+            mostrarNotificacion("⚠️ Cuidado: Saldo insuficiente.");
+            return;
+        }
+
         historial.value.push({
             id: Date.now(),
             tipo,
@@ -31,63 +57,28 @@ export const useGestioStore = defineStore('gestio', () => {
             monto,
             fecha: new Date().toISOString()
         });
+        
         sincronizar();
+        mostrarNotificacion("¡Movimiento registrado con éxito!");
     }
 
     function limpiarHistorial() {
         historial.value = [];
         sincronizar();
+        mostrarNotificacion("Historial limpiado.");
     }
 
-    const auditoria = computed(() => {
-        const egresos = historial.value.filter(m => m.tipo === 'Egreso');
-        const totalIng = totalIngresos.value;
-        const totalEgr = totalEgresos.value;
+    // Cálculos globales
+    const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
+    const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
+    const saldo = computed(() => totalIngresos.value - totalEgresos.value);
 
-        if (egresos.length === 0) {
-            return {
-                titulo: "¡Todo listo!",
-                mensaje: "No tienes egresos registrados aún. ¡Registra tu primer gasto para empezar a controlar tu salud financiera!",
-                emoji: "🚀"
-            };
-        }
-
-        const maxGasto = egresos.reduce((prev, current) => (prev.monto > current.monto) ? prev : current);
-        const porcentajeGasto = (maxGasto.monto / (totalIng > 0 ? totalIng : 1)) * 100;
-
-        if (totalIng > 0 && totalEgr > totalIng) {
-            return {
-                titulo: "¡Alerta Roja!",
-                mensaje: "Estás gastando más de lo que ingresas. Necesitas recortar gastos urgentemente.",
-                emoji: "⚠️"
-            };
-        }
-
-        if (porcentajeGasto > 50) {
-            return {
-                titulo: "Gasto elevado detectado",
-                mensaje: `Cuidado: Tu gasto en ${maxGasto.categoria} representa el ${porcentajeGasto.toFixed(0)}% de tus ingresos. Es un monto muy alto.`,
-                emoji: "🧐"
-            };
-        }
-
-        return {
-            titulo: "Salud financiera estable",
-            mensaje: "Tus gastos están bajo control y tu ahorro se mantiene saludable. ¡Sigue así!",
-            emoji: "✨"
-        };
-    });
-
+    // Lógica de filtrado
     const historialFiltrado = computed(() => {
         let filtrado = historial.value;
 
-        if (filtroTipo.value !== 'Todos') {
-            filtrado = filtrado.filter(m => m.tipo === filtroTipo.value);
-        }
-
-        if (filtroCategoria.value !== 'Todas') {
-            filtrado = filtrado.filter(m => m.categoria === filtroCategoria.value);
-        }
+        if (filtroTipo.value !== 'Todos') filtrado = filtrado.filter(m => m.tipo === filtroTipo.value);
+        if (filtroCategoria.value !== 'Todas') filtrado = filtrado.filter(m => m.categoria === filtroCategoria.value);
 
         const hoy = new Date();
         if (filtroTiempo.value === 'Hoy') {
@@ -102,22 +93,26 @@ export const useGestioStore = defineStore('gestio', () => {
                 new Date(m.fecha).getFullYear() === hoy.getFullYear()
             );
         }
-
         return filtrado;
     });
 
-    const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
-    const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
-    const saldo = computed(() => totalIngresos.value - totalEgresos.value);
-
     const totalIngresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
+
+    // Auditoría mejorada
+    const auditoria = computed(() => {
+        const egresos = historial.value.filter(m => m.tipo === 'Egreso');
+        if (egresos.length === 0) return { titulo: "¡Todo listo!", mensaje: "Registra tu primer gasto.", emoji: "🚀" };
+        if (totalEgresos.value > totalIngresos.value) return { titulo: "¡Alerta Roja!", mensaje: "Gastos superiores a ingresos.", emoji: "⚠️" };
+        return { titulo: "Salud financiera estable", mensaje: "Tus gastos están controlados.", emoji: "✨" };
+    });
 
     return {
         historial,
         filtroTipo,
         filtroCategoria,
         filtroTiempo,
+        mensajeNotificacion,
         agregarMovimiento,
         limpiarHistorial,
         auditoria,
@@ -126,6 +121,7 @@ export const useGestioStore = defineStore('gestio', () => {
         totalEgresos,
         saldo,
         totalIngresosFiltrados,
-        totalEgresosFiltrados
+        totalEgresosFiltrados,
+        formatearBs
     };
 });

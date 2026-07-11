@@ -36,6 +36,7 @@ const ejecutarAccion = () => {
 <template>
     <div class="min-h-screen bg-gray-50 text-gray-800 font-sans">
 
+        <!-- Mobile Header -->
         <header
             class="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-40">
             <button @click="menuAbierto = true" class="p-2 text-gray-600">
@@ -46,14 +47,15 @@ const ejecutarAccion = () => {
             </button>
             <div class="flex items-center gap-2">
                 <h2 class="text-2xl font-bold text-[#0332fd]">GESTIO</h2>
-                <img :src="logoImg" alt="Logo" class="w-15 h-15" />
+                <img :src="logoImg" alt="Logo" class="w-10 h-10" />
             </div>
         </header>
 
+        <!-- Sidebar -->
         <nav class="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 p-6 z-50 transition-transform duration-300 md:translate-x-0 flex flex-col"
             :class="menuAbierto ? 'translate-x-0' : '-translate-x-full'">
             <div class="flex items-center gap-2 mb-10">
-                <img :src="logoImg" alt="Logo" class="w-15 h-15" />
+                <img :src="logoImg" alt="Logo" class="w-10 h-10" />
                 <h2 class="text-2xl font-bold text-[#0332fd]">GESTIO</h2>
             </div>
             <ul class="space-y-4">
@@ -84,26 +86,27 @@ const ejecutarAccion = () => {
 
         <main class="p-4 md:ml-64 md:p-12">
             <header class="mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">Hola, UsuarioV1! </h2>
+                <h2 class="text-3xl font-bold text-gray-800">Hola, Daniel!</h2>
                 <p class="text-gray-500 font-medium">Bienvenido a tu panel financiero</p>
             </header>
 
+            <!-- Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-[#0332fd] rounded-3xl p-8 text-white shadow-lg flex flex-col justify-between">
                     <div>
                         <p class="text-sm opacity-80 uppercase tracking-widest flex items-center gap-2">
                             <WalletIcon class="w-5 h-5" /> Saldo disponible
                         </p>
-                        <h1 class="text-4xl font-bold mt-2">Bs. {{ store.saldo.toFixed(2) }}</h1>
+                        <h1 class="text-4xl font-bold mt-2">{{ store.formatearBs(store.saldo) }}</h1>
                     </div>
                     <div class="flex gap-6 mt-8 pt-6 border-t border-white/20">
                         <div>
                             <p class="text-xs opacity-70">Ingresos</p>
-                            <p class="font-bold text-lg">Bs. {{ store.totalIngresos.toFixed(2) }}</p>
+                            <p class="font-bold text-lg">{{ store.formatearBs(store.totalIngresos) }}</p>
                         </div>
                         <div>
                             <p class="text-xs opacity-70">Egresos</p>
-                            <p class="font-bold text-lg">Bs. {{ store.totalEgresos.toFixed(2) }}</p>
+                            <p class="font-bold text-lg">{{ store.formatearBs(store.totalEgresos) }}</p>
                         </div>
                     </div>
                 </div>
@@ -114,14 +117,16 @@ const ejecutarAccion = () => {
                 </div>
             </div>
 
+            <!-- Auditoria -->
             <section class="bg-blue-600 p-6 rounded-3xl shadow-sm text-white flex items-center gap-4 mb-8">
-    <div class="text-3xl bg-blue-500/30 p-3 rounded-2xl">{{ store.auditoria.emoji }}</div>
-    <div>
-        <h3 class="font-bold text-lg">{{ store.auditoria.titulo }}</h3>
-        <p class="text-blue-100 text-sm opacity-90">{{ store.auditoria.mensaje }}</p>
-    </div>
-</section>
+                <div class="text-3xl bg-blue-500/30 p-3 rounded-2xl">{{ store.auditoria.emoji }}</div>
+                <div>
+                    <h3 class="font-bold text-lg">{{ store.auditoria.titulo }}</h3>
+                    <p class="text-blue-100 text-sm opacity-90">{{ store.auditoria.mensaje }}</p>
+                </div>
+            </section>
 
+            <!-- Formulario -->
             <div class="flex gap-4 mb-8">
                 <button @click="tipoSeleccionado = 'Ingreso'"
                     class="flex-1 flex items-center justify-center gap-2 bg-[#5895eb] text-white py-4 rounded-2xl font-bold hover:bg-[#0332fd] transition shadow-md">
@@ -157,6 +162,7 @@ const ejecutarAccion = () => {
                 </div>
             </div>
 
+            <!-- Historial -->
             <section class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold text-gray-800">Historial reciente</h3>
@@ -166,12 +172,9 @@ const ejecutarAccion = () => {
                     </button>
                 </div>
 
-                <div <div
-                    class="space-y-3 max-h-100 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-                    <div v-if="store.historial.length === 0" class="text-center py-10 text-gray-400">
-                        No hay movimientos recientes
-                    </div>
-
+                <div class="space-y-3 max-h-100 overflow-y-auto pr-2 scrollbar-thin">
+                    <div v-if="store.historial.length === 0" class="text-center py-10 text-gray-400">No hay movimientos
+                        registrados</div>
                     <div v-for="mov in store.historial" :key="mov.id"
                         class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                         <div>
@@ -179,11 +182,17 @@ const ejecutarAccion = () => {
                             <p class="text-xs text-gray-400">{{ mov.categoria }}</p>
                         </div>
                         <span :class="mov.tipo === 'Ingreso' ? 'text-[#0332fd]' : 'text-red-500'" class="font-bold">
-                            {{ mov.tipo === 'Ingreso' ? '+' : '-' }} Bs. {{ mov.monto.toFixed(2) }}
+                            {{ mov.tipo === 'Ingreso' ? '+' : '-' }} {{ store.formatearBs(mov.monto) }}
                         </span>
                     </div>
                 </div>
             </section>
         </main>
+
+        <!-- Toast de notificación -->
+        <div v-if="store.mensajeNotificacion"
+            class="fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-2xl shadow-xl z-50 animate-bounce">
+            {{ store.mensajeNotificacion }}
+        </div>
     </div>
 </template>
