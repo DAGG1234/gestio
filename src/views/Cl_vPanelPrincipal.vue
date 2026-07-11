@@ -115,12 +115,12 @@ const ejecutarAccion = () => {
             </div>
 
             <section class="bg-blue-600 p-6 rounded-3xl shadow-sm text-white flex items-center gap-4 mb-8">
-                <div class="text-3xl bg-blue-500/30 p-3 rounded-2xl">💡</div>
-                <div>
-                    <h3 class="font-bold text-lg">Auditoría de Salud</h3>
-                    <p class="text-blue-100 text-sm opacity-90">{{ store.auditoria }}</p>
-                </div>
-            </section>
+    <div class="text-3xl bg-blue-500/30 p-3 rounded-2xl">{{ store.auditoria.emoji }}</div>
+    <div>
+        <h3 class="font-bold text-lg">{{ store.auditoria.titulo }}</h3>
+        <p class="text-blue-100 text-sm opacity-90">{{ store.auditoria.mensaje }}</p>
+    </div>
+</section>
 
             <div class="flex gap-4 mb-8">
                 <button @click="tipoSeleccionado = 'Ingreso'"

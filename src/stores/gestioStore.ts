@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue'; 
+import { ref, computed } from 'vue';
 
 export interface IMovimiento {
     id: number;
@@ -13,7 +13,7 @@ export interface IMovimiento {
 export const useGestioStore = defineStore('gestio', () => {
     const saved = localStorage.getItem('gestio_historial');
     const historial = ref<IMovimiento[]>(saved ? JSON.parse(saved) : []);
-    
+
     const filtroTipo = ref('Todos');
     const filtroCategoria = ref('Todas');
     const filtroTiempo = ref('Todo');
@@ -31,25 +31,51 @@ export const useGestioStore = defineStore('gestio', () => {
             monto,
             fecha: new Date().toISOString()
         });
-        sincronizar(); 
+        sincronizar();
     }
 
     function limpiarHistorial() {
         historial.value = [];
-        sincronizar(); 
+        sincronizar();
     }
 
     const auditoria = computed(() => {
         const egresos = historial.value.filter(m => m.tipo === 'Egreso');
-        if (egresos.length === 0) return "¡Empecemos! Registra tu primer gasto para ver tu salud financiera.";
+        const totalIng = totalIngresos.value;
+        const totalEgr = totalEgresos.value;
 
-        const maxGasto = egresos.reduce((prev, current) => (prev.monto > current.monto) ? prev : current);
-
-        if (totalIngresos.value > 0 && maxGasto.monto > (totalIngresos.value * 0.4)) {
-            return `¡Cuidado! Tu mayor gasto fue en ${maxGasto.categoria} (Bs. ${maxGasto.monto}). Representa más del 40% de tus ingresos.`;
+        if (egresos.length === 0) {
+            return {
+                titulo: "¡Todo listo!",
+                mensaje: "No tienes egresos registrados aún. ¡Registra tu primer gasto para empezar a controlar tu salud financiera!",
+                emoji: "🚀"
+            };
         }
 
-        return "Vas por buen camino. Tus gastos están distribuidos de forma saludable.";
+        const maxGasto = egresos.reduce((prev, current) => (prev.monto > current.monto) ? prev : current);
+        const porcentajeGasto = (maxGasto.monto / (totalIng > 0 ? totalIng : 1)) * 100;
+
+        if (totalIng > 0 && totalEgr > totalIng) {
+            return {
+                titulo: "¡Alerta Roja!",
+                mensaje: "Estás gastando más de lo que ingresas. Necesitas recortar gastos urgentemente.",
+                emoji: "⚠️"
+            };
+        }
+
+        if (porcentajeGasto > 50) {
+            return {
+                titulo: "Gasto elevado detectado",
+                mensaje: `Cuidado: Tu gasto en ${maxGasto.categoria} representa el ${porcentajeGasto.toFixed(0)}% de tus ingresos. Es un monto muy alto.`,
+                emoji: "🧐"
+            };
+        }
+
+        return {
+            titulo: "Salud financiera estable",
+            mensaje: "Tus gastos están bajo control y tu ahorro se mantiene saludable. ¡Sigue así!",
+            emoji: "✨"
+        };
     });
 
     const historialFiltrado = computed(() => {
