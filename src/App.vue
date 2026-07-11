@@ -4,7 +4,6 @@ import { useUserStore } from './stores/userStore';
 
 const store = useUserStore();
 
-// Función para sincronizar la clase 'dark' con el elemento raíz
 const updateThemeClass = (isDark: boolean) => {
   if (isDark) {
     document.documentElement.classList.add('dark');
@@ -13,12 +12,10 @@ const updateThemeClass = (isDark: boolean) => {
   }
 };
 
-// Al cargar la app, aplicamos el tema guardado
 onMounted(() => {
   updateThemeClass(store.isDarkMode);
 });
 
-// Observamos cambios para actualizar el DOM en tiempo real
 watch(() => store.isDarkMode, (newVal) => {
   updateThemeClass(newVal);
 });

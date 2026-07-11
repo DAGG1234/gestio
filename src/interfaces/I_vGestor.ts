@@ -6,7 +6,7 @@ export interface IGestor {
     registrarOperacion(mov: IMovimiento): void;
     obtenerSaldo(): number;
     obtenerHistorial(): IMovimiento[];
-    obtenerTotalIngresos(): number; // Asegúrate de tener esta
-    obtenerTotalEgresos(): number;  // Asegúrate de tener esta
+    obtenerTotalIngresos(): number; 
+    obtenerTotalEgresos(): number;  
     vaciarMovimientos(): void;
 }

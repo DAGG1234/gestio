@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 export const useUserStore = defineStore('user', {
     state: () => ({
         // Datos del usuario
-        nombre: 'Daniel Gonzalez',
-        correo: 'daniel19gg@email.com',
+        nombre: 'UsuarioV1',
+        correo: 'usuariodeprueba@gmail.com',
         // Estado del modo oscuro (iniciado desde localStorage)
         isDarkMode: localStorage.getItem('darkMode') === 'true',
     }),

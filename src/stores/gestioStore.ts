@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue'; // ¡Listo! Problema resuelto
+import { ref, computed } from 'vue'; 
 
 export interface IMovimiento {
     id: number;
@@ -11,8 +11,6 @@ export interface IMovimiento {
 }
 
 export const useGestioStore = defineStore('gestio', () => {
-    // ESTADO
-    // 1. Cargamos desde localStorage al iniciar, o iniciamos vacío
     const saved = localStorage.getItem('gestio_historial');
     const historial = ref<IMovimiento[]>(saved ? JSON.parse(saved) : []);
     
@@ -20,12 +18,10 @@ export const useGestioStore = defineStore('gestio', () => {
     const filtroCategoria = ref('Todas');
     const filtroTiempo = ref('Todo');
 
-    // FUNCIÓN AUXILIAR DE PERSISTENCIA
     function sincronizar() {
         localStorage.setItem('gestio_historial', JSON.stringify(historial.value));
     }
 
-    // ACCIONES
     function agregarMovimiento(tipo: 'Ingreso' | 'Egreso', categoria: string, descripcion: string, monto: number) {
         historial.value.push({
             id: Date.now(),
@@ -35,15 +31,14 @@ export const useGestioStore = defineStore('gestio', () => {
             monto,
             fecha: new Date().toISOString()
         });
-        sincronizar(); // Guardamos cada vez que agregamos
+        sincronizar(); 
     }
 
     function limpiarHistorial() {
         historial.value = [];
-        sincronizar(); // Guardamos después de limpiar
+        sincronizar(); 
     }
 
-    // COMPUTED: AUDITORÍA
     const auditoria = computed(() => {
         const egresos = historial.value.filter(m => m.tipo === 'Egreso');
         if (egresos.length === 0) return "¡Empecemos! Registra tu primer gasto para ver tu salud financiera.";
@@ -57,7 +52,6 @@ export const useGestioStore = defineStore('gestio', () => {
         return "Vas por buen camino. Tus gastos están distribuidos de forma saludable.";
     });
 
-    // COMPUTED: FILTRADO
     const historialFiltrado = computed(() => {
         let filtrado = historial.value;
 
@@ -86,7 +80,6 @@ export const useGestioStore = defineStore('gestio', () => {
         return filtrado;
     });
 
-    // COMPUTED: TOTALES
     const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
     const saldo = computed(() => totalIngresos.value - totalEgresos.value);

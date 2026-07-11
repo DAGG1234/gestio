@@ -19,7 +19,6 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
 <template>
     <div class="min-h-screen bg-gray-50 text-gray-800 font-sans">
 
-        <!-- HEADER MÓVIL -->
         <header
             class="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-40">
             <button @click="menuAbierto = true" class="p-2 text-gray-600">
@@ -34,7 +33,6 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
             </div>
         </header>
 
-        <!-- NAV LATERAL -->
         <nav class="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 p-6 z-50 transition-transform duration-300 md:translate-x-0 flex flex-col"
             :class="menuAbierto ? 'translate-x-0' : '-translate-x-full'">
             <div class="flex items-center gap-2 mb-10">
@@ -67,14 +65,12 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
 
         <div v-if="menuAbierto" @click="menuAbierto = false" class="md:hidden fixed inset-0 bg-black/50 z-40"></div>
 
-        <!-- CONTENIDO -->
         <main class="p-4 md:ml-64 md:p-12">
             <header class="mb-8 flex items-center gap-3">
                 <DocumentTextIcon class="w-8 h-8 text-[#0332fd]" />
                 <h2 class="text-3xl font-bold text-gray-800">Movimientos</h2>
             </header>
 
-            <!-- TOTALES -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <p class="text-gray-400 text-xs font-bold uppercase mb-1">Ingresos</p>
@@ -91,7 +87,6 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
                 </div>
             </div>
 
-            <!-- FILTROS Y GRÁFICA -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <section class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                     <h3 class="text-lg font-bold mb-4">Análisis visual</h3>
@@ -125,7 +120,6 @@ const categorias = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 
                 </section>
             </div>
 
-            <!-- TABLA -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-gray-400 text-xs uppercase">

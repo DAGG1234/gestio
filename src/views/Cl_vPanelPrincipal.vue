@@ -84,7 +84,7 @@ const ejecutarAccion = () => {
 
         <main class="p-4 md:ml-64 md:p-12">
             <header class="mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">Hola, Daniel González! </h2>
+                <h2 class="text-3xl font-bold text-gray-800">Hola, UsuarioV1! </h2>
                 <p class="text-gray-500 font-medium">Bienvenido a tu panel financiero</p>
             </header>
 

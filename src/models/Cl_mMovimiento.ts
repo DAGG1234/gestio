@@ -9,12 +9,12 @@ export default class Cl_mMovimiento implements IMovimiento {
     private _fecha: string = "";
 
     constructor(
-        id: string, // Para identificar el movimiento
-        tipo: 'Ingreso' | 'Egreso', // Define si suma o resta
-        categoria: string, // Para el "Historial más complejo"
+        id: string, 
+        tipo: 'Ingreso' | 'Egreso', 
+        categoria: string, 
         descripcion: string,
         monto: number,
-        fecha: string // Para el diario cronológico
+        fecha: string 
     ) {
         this.id = id;
         this.tipo = tipo;

@@ -7,7 +7,6 @@ import { useGestioStore } from '../stores/gestioStore';
 ChartJS.register(ArcElement, Tooltip, Legend);
 const store = useGestioStore();
 
-// Añadimos el prop "modo" para controlar su comportamiento
 const props = defineProps({ modo: { type: String, default: 'detalle' } });
 
 const mapaColores = {
@@ -17,20 +16,16 @@ const mapaColores = {
 };
 
 const chartData = computed(() => {
-  // MODO RESUMEN (Para el Panel Principal)
-  // Ignora filtros y muestra Ingreso Total vs Egreso Total
   if (props.modo === 'resumen') {
     return {
       labels: ['Ingresos', 'Egresos'],
       datasets: [{
-        backgroundColor: ['#0332fd', '#ef4444'], // Azul y Rojo
-        data: [store.totalIngresos, store.totalEgresos] // Usamos totales generales
+        backgroundColor: ['#0332fd', '#ef4444'], 
+        data: [store.totalIngresos, store.totalEgresos] 
       }]
     };
   }
 
-  // MODO DETALLE (Para el Historial)
-  // Usa los filtros del store
   const totalIngreso = store.totalIngresosFiltrados;
   const esFiltroGeneral = store.filtroCategoria === 'Todas' || !store.filtroCategoria;
   
