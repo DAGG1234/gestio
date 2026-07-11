@@ -11,47 +11,36 @@ export interface IMovimiento {
 }
 
 export const useGestioStore = defineStore('gestio', () => {
-    // 1. Historial de pantalla (SE LIMPIA al darle al botón)
-    const savedReciente = localStorage.getItem('gestio_reciente');
-    const historial = ref<IMovimiento[]>(savedReciente ? JSON.parse(savedReciente) : []);
-    
-    // 2. Historial TOTAL (NUNCA SE LIMPIA, alimenta saldo, gráfica y auditoría)
-    const savedTotal = localStorage.getItem('gestio_total');
-    const historialTotal = ref<IMovimiento[]>(savedTotal ? JSON.parse(savedTotal) : []);
+    const saved = localStorage.getItem('gestio_historial');
+    const historial = ref<IMovimiento[]>(saved ? JSON.parse(saved) : []);
     
     const filtroTipo = ref('Todos');
     const filtroCategoria = ref('Todas');
     const filtroTiempo = ref('Todo');
 
     function sincronizar() {
-        localStorage.setItem('gestio_reciente', JSON.stringify(historial.value));
-        localStorage.setItem('gestio_total', JSON.stringify(historialTotal.value));
+        localStorage.setItem('gestio_historial', JSON.stringify(historial.value));
     }
 
     function agregarMovimiento(tipo: 'Ingreso' | 'Egreso', categoria: string, descripcion: string, monto: number) {
-        const nuevo: IMovimiento = {
+        historial.value.push({
             id: Date.now(),
             tipo,
             categoria,
             descripcion,
             monto,
             fecha: new Date().toISOString()
-        };
-        
-        historial.value.push(nuevo);
-        historialTotal.value.push(nuevo);
+        });
         sincronizar(); 
     }
 
-    // AHORA: Solo limpia el historial de pantalla, el total permanece intacto
     function limpiarHistorial() {
         historial.value = [];
         sincronizar(); 
     }
 
-    // Auditoría basada en el historial TOTAL (No se pierde al limpiar pantalla)
     const auditoria = computed(() => {
-        const egresos = historialTotal.value.filter(m => m.tipo === 'Egreso');
+        const egresos = historial.value.filter(m => m.tipo === 'Egreso');
         if (egresos.length === 0) return "¡Empecemos! Registra tu primer gasto para ver tu salud financiera.";
 
         const maxGasto = egresos.reduce((prev, current) => (prev.monto > current.monto) ? prev : current);
@@ -63,7 +52,6 @@ export const useGestioStore = defineStore('gestio', () => {
         return "Vas por buen camino. Tus gastos están distribuidos de forma saludable.";
     });
 
-    // Filtros de pantalla (Se mantienen igual para el historial reciente)
     const historialFiltrado = computed(() => {
         let filtrado = historial.value;
 
@@ -92,18 +80,15 @@ export const useGestioStore = defineStore('gestio', () => {
         return filtrado;
     });
 
-    // CÁLCULOS GLOBALES (Leen del Total, por lo tanto no se borran al limpiar pantalla)
-    const totalIngresos = computed(() => historialTotal.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
-    const totalEgresos = computed(() => historialTotal.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
+    const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
+    const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
     const saldo = computed(() => totalIngresos.value - totalEgresos.value);
 
-    // Cálculos para filtros de pantalla
     const totalIngresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresosFiltrados = computed(() => historialFiltrado.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
 
     return {
         historial,
-        historialTotal,
         filtroTipo,
         filtroCategoria,
         filtroTiempo,
