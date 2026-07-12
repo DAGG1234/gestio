@@ -6,12 +6,12 @@ import Configuracion from '../views/Configuracion.vue'; // Corregido con V mayú
 const routes = [
   { path: '/', name: 'Dashboard', component: PanelPrincipal },
   { path: '/auditoria', name: 'Auditoria', component: HistorialCompleto },
-  { path: '/configuracion',  name: 'Configuracion', component: Configuracion }
+  { path: '/configuracion', name: 'Configuracion', component: Configuracion }
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes
+  history: createWebHistory(),
+  routes
 });
 
 export default router; 
