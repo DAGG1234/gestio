@@ -48,14 +48,14 @@ export const useMovimientosStore = defineStore('movimientos', () => {
         return historial.value.filter(m => m.tipo === filtroTipo.value);
     });
 
-    return { 
-        historial, 
+    return {
+        historial,
         historialFiltrado,
         filtroTipo,
-        totalIngresos, 
-        totalEgresos, 
-        saldo, 
-        agregarMovimiento, 
+        totalIngresos,
+        totalEgresos,
+        saldo,
+        agregarMovimiento,
         limpiarHistorial,
         establecerFiltro
     };
