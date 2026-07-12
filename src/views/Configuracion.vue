@@ -106,14 +106,25 @@ const handleNameUpdate = () => {
           <PencilSquareIcon class="w-4 h-4" /> Cambiar nombre de usuario
         </button>
 
-        <div v-if="showNameForm" class="mt-6 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+        <div v-if="showNameForm" class="mt-6 p-4 md:p-6 bg-gray-50 rounded-2xl border border-gray-100">
           <label class="block text-sm font-bold text-gray-600 mb-2">Nuevo nombre de usuario:</label>
-          <div class="flex gap-4">
+
+          <div class="flex flex-col md:flex-row gap-3 md:gap-4">
+
             <input v-model="nuevoNombre" type="text" placeholder="Ej: Juan Perez"
-              class="w-full md:w-1/2 p-3 rounded-xl border border-gray-200" />
-            <button @click="handleNameUpdate"
-              class="bg-[#0332fd] text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-800 transition">Aceptar</button>
-            <button @click="showNameForm = false" class="text-gray-500 hover:text-gray-800">Cancelar</button>
+              class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#0332fd] outline-none" />
+
+            <div class="flex gap-3">
+              <button @click="handleNameUpdate"
+                class="flex-1 md:flex-none bg-[#0332fd] text-white px-6 py-3 md:py-2 rounded-xl font-bold hover:bg-blue-800 transition whitespace-nowrap">
+                Aceptar
+              </button>
+
+              <button @click="showNameForm = false" class="px-4 text-gray-500 hover:text-gray-800 font-medium">
+                Cancelar
+              </button>
+            </div>
+
           </div>
         </div>
       </section>

@@ -3,10 +3,19 @@ import { computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useUiStore } from '../stores/uiStore';
+import { useMovimientosStore } from '../stores/movimientosStore';
+
+const props = defineProps({
+  modo: {
+    type: String,
+    default: 'detalle'
+  }
+});
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const uiStore = useUiStore();
+const movStore = useMovimientosStore();
 
 const mapaColores = {
   'Hogar': '#f59e0b', 'Comida': '#10b981', 'Salida': '#f43f5e',
@@ -16,38 +25,38 @@ const mapaColores = {
 };
 
 const chartData = computed(() => {
-  const movimientos = uiStore.historialFiltrado;
-  let labels = [];
-  let data = [];
-  let colors = [];
+  // 1. Obtenemos el historial completo
+  let movimientos = props.modo === 'resumen' ? movStore.historial : movStore.historialFiltrado;
 
-  // 1. Si hay una categoría específica seleccionada, mostramos un solo dato (o el desglose si hubiera varios movimientos)
-  if (uiStore.filtroCategoria !== 'Todas') {
-    const total = movimientos.reduce((sum, m) => sum + m.monto, 0);
-    labels = [uiStore.filtroCategoria];
-    data = [total];
-    colors = [mapaColores[uiStore.filtroCategoria] || '#64748b'];
+  // 2. Si es detalle, aplicamos el filtro de tipo (Ingreso/Egreso) si no es 'Todos'
+  // IMPORTANTE: Esto asegura que si elegiste 'Ingreso', solo trabajamos con ingresos.
+  if (props.modo === 'detalle' && uiStore.filtroTipo !== 'Todos') {
+    movimientos = movimientos.filter(m => m.tipo === uiStore.filtroTipo);
   }
-  // 2. Si el filtro es por tipo (Ingreso/Egreso) pero categoría 'Todas'
-  else if (uiStore.filtroTipo !== 'Todos') {
-    const categorias = [...new Set(movimientos.map(m => m.categoria))];
-    categorias.forEach(cat => {
-      const montoCat = movimientos.filter(m => m.categoria === cat).reduce((sum, m) => sum + m.monto, 0);
-      if (montoCat > 0) {
-        labels.push(cat);
-        data.push(montoCat);
-        colors.push(mapaColores[cat] || '#64748b');
-      }
-    });
-  }
-  // 3. Si todo está en 'Todos', mostramos comparación global Ingreso vs Egreso
-  else {
-    const totalIng = movimientos.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0);
-    const totalEgr = movimientos.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0);
 
-    if (totalIng > 0) { labels.push('Ingresos'); data.push(totalIng); colors.push('#0332fd'); }
-    if (totalEgr > 0) { labels.push('Egresos'); data.push(totalEgr); colors.push('#ef4444'); }
+  // 3. Aplicamos el filtro de categoría específica si existe
+  if (props.modo === 'detalle' && uiStore.filtroCategoria !== 'Todas') {
+    movimientos = movimientos.filter(m => m.categoria === uiStore.filtroCategoria);
   }
+
+  // 4. Agrupamos por categoría
+  const categoriasUnicas = [...new Set(movimientos.map(m => m.categoria))];
+
+  const labels = [];
+  const data = [];
+  const colors = [];
+
+  categoriasUnicas.forEach(cat => {
+    const totalCat = movimientos
+      .filter(m => m.categoria === cat)
+      .reduce((sum, m) => sum + m.monto, 0);
+
+    if (totalCat > 0) {
+      labels.push(cat);
+      data.push(totalCat);
+      colors.push(mapaColores[cat] || '#64748b');
+    }
+  });
 
   return {
     datasets: [{ backgroundColor: colors, data, borderWidth: 0, hoverOffset: 10 }],
@@ -58,8 +67,12 @@ const chartData = computed(() => {
 
 <template>
   <div class="h-64 w-full flex justify-center items-center">
-    <!-- El :key asegura que Vue destruya y cree la gráfica al cambiar los datos -->
-    <Doughnut :key="JSON.stringify(chartData)" :data="chartData"
-      :options="{ responsive: true, maintainAspectRatio: false }" />
+    <Doughnut :key="JSON.stringify(chartData)" :data="chartData" :options="{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { usePointStyle: true } }
+      }
+    }" />
   </div>
 </template>
