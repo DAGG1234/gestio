@@ -34,6 +34,8 @@ const categoriasEgreso = [
     "Transporte",
     "Salud",
     "Educación",
+    "Ahorro",
+    "Otros"
 ];
 const categoriasIngreso = ["Sueldo", "Trabajo", "Emprendimiento", "Regalo"];
 

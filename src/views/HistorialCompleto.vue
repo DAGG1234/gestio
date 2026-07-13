@@ -18,7 +18,7 @@ const menuAbierto = ref(false);
 
 // Listas de categorías organizadas
 const categoriasIngreso = ['Sueldo', 'Trabajo', 'Emprendimiento', 'Regalo'];
-const categoriasEgreso = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 'Educación', 'Otros'];
+const categoriasEgreso = ['Hogar', 'Comida', 'Salida', 'Ropa', 'Transporte', 'Salud', 'Educación', 'Ahorro', 'Otros'];
 
 // Lógica para filtrar el select de categorías según el tipo
 const categoriasFiltradas = computed(() => {
