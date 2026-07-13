@@ -3,12 +3,12 @@
     "short_name": "Gestio",
     "icons": [
         {
-            "src": "./logo-gestio.png",
+            "src": "/logo-gestio.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "./logo-gestio.png",
+            "src": "/logo-gestio.png",
             "sizes": "512x512",
             "type": "image/png"
         }
