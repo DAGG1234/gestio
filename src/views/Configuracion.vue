@@ -42,6 +42,7 @@ const handleNameUpdate = () => {
       </div>
     </header>
 
+    <!-- Sidebar -->
     <nav
       class="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 p-6 z-50 transition-transform duration-300 md:translate-x-0 flex flex-col"
       :class="menuAbierto ? 'translate-x-0' : '-translate-x-full'">
@@ -62,14 +63,18 @@ const handleNameUpdate = () => {
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/configuracion"
+          <RouterLink to="/configuracion" active-class="font-bold text-[#0332fd] border-l-4 border-[#0332fd]"
             class="flex items-center gap-3 font-bold text-[#0332fd] border-l-4 border-[#0332fd] pl-4 py-2">
             <Cog6ToothIcon class="w-5 h-5" /> Configuración
           </RouterLink>
         </li>
       </ul>
       <div class="mt-auto pt-6 text-xs text-gray-400 font-medium text-center">Versión 1.2.0</div>
+      <button @click="menuAbierto = false" class="md:hidden absolute top-4 right-4 text-xl">✕</button>
     </nav>
+
+
+    <div v-if="menuAbierto" @click="menuAbierto = false" class="md:hidden fixed inset-0 bg-black/50 z-40"></div>
 
     <main class="p-6 md:ml-64 md:p-12">
       <h2 class="text-3xl font-bold mb-8">Configuración</h2>

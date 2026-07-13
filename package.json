@@ -11,14 +11,16 @@
     "@heroicons/vue": "^2.2.0",
     "@vercel/analytics": "^2.0.1",
     "chart.js": "^4.5.1",
+    "exceljs": "^4.4.0",
     "pinia": "^2.3.1",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.4",
     "vue-router": "^4.6.4",
-    "xlsx": "^0.18.5"
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.2",
+    "@types/exceljs": "^0.5.3",
     "@types/node": "^26.1.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.20",
