@@ -163,62 +163,47 @@ watch(() => uiStore.filtroTipo, () => {
                 </section>
             </div>
 
-            <!-- Tabla de Historial -->
-            <div class="p-4 sm:p-6 w-full">
+            <div class="p-2 sm:p-4 w-full">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 px-2">
+        <h2 class="text-xl font-bold text-gray-800">Historial Detallado</h2>
+        <button @click="movStore.descargarAuditoria()"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#0332fd] hover:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-2xl shadow-md transition-all active:scale-95 duration-200">
+            <span>Descargar Reporte</span>
+        </button>
+    </div>
 
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-
-                    <h2 class="text-xl font-bold text-gray-800">Historial Detallado</h2>
-
-                    <button @click="movStore.descargarAuditoria()"
-                        class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#0332fd] hover:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-2xl shadow-md transition-all active:scale-95 duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        <span>Generar Reporte</span>
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="overflow-x-auto custom-scrollbar max-h-125">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 text-gray-400 text-xs uppercase sticky top-0 z-10">
-                                <tr>
-                                    <th class="p-4">Fecha</th>
-                                    <th class="p-4">Categoría</th>
-                                    <th class="p-4">Descripción</th>
-                                    <th class="p-4 text-right">Ingreso</th>
-                                    <th class="p-4 text-right">Egreso</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                <tr v-if="uiStore.historialFiltrado.length === 0">
-                                    <td colspan="5" class="p-8 text-center text-gray-400 italic">No hay movimientos.
-                                    </td>
-                                </tr>
-                                <tr v-for="mov in uiStore.historialFiltrado" :key="mov.id"
-                                    class="hover:bg-gray-50 transition">
-                                    <td class="p-4 text-gray-500 whitespace-nowrap">
-                                        {{ new Date(mov.fecha).toLocaleDateString('es-VE', {
-                                            day: '2-digit', month:
-                                        '2-digit' }) }}
-                                    </td>
-                                    <td class="p-4 font-medium text-gray-700 whitespace-nowrap">{{ mov.categoria }}</td>
-                                    <td class="p-4 text-gray-600 min-w-37.5">{{ mov.descripcion }}</td>
-                                    <td class="p-4 text-right text-[#0332fd] font-bold whitespace-nowrap">
-                                        {{ mov.tipo === 'Ingreso' ? uiStore.formatearBs(mov.monto) : '-' }}
-                                    </td>
-                                    <td class="p-4 text-right text-red-500 font-bold whitespace-nowrap">
-                                        {{ mov.tipo === 'Egreso' ? uiStore.formatearBs(mov.monto) : '-' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full min-w-175 text-left text-sm">
+                <thead class="bg-gray-50 text-gray-400 text-xs uppercase sticky top-0 z-10">
+                    <tr>
+                        <th class="p-3 pl-4">Fecha</th>
+                        <th class="p-3">Categoría</th>
+                        <th class="p-3">Descripción</th>
+                        <th class="p-3 text-right">Ingreso</th>
+                        <th class="p-3 pr-4 text-right">Egreso</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <tr v-if="uiStore.historialFiltrado.length === 0">
+                        <td colspan="5" class="p-8 text-center text-gray-400 italic">No hay movimientos.</td>
+                    </tr>
+                    <tr v-for="mov in uiStore.historialFiltrado" :key="mov.id" class="hover:bg-gray-50 transition">
+                        <td class="p-3 pl-4 text-gray-500 whitespace-nowrap">{{ new Date(mov.fecha).toLocaleDateString('es-VE') }}</td>
+                        <td class="p-3 font-medium text-gray-700 whitespace-nowrap">{{ mov.categoria }}</td>
+                        <td class="p-3 text-gray-600 truncate max-w-45">{{ mov.descripcion }}</td>
+                        <td class="p-3 text-right text-[#0332fd] font-bold whitespace-nowrap">
+                            {{ mov.tipo === 'Ingreso' ? uiStore.formatearBs(mov.monto) : '-' }}
+                        </td>
+                        <td class="p-3 pr-4 text-right text-red-500 font-bold whitespace-nowrap">
+                            {{ mov.tipo === 'Egreso' ? uiStore.formatearBs(mov.monto) : '-' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
         </main>
     </div>
 </template>
