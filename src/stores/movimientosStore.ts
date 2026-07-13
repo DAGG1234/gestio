@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import * as XLSX from 'xlsx';
 
 export interface IMovimiento {
     id: number;
@@ -11,11 +12,11 @@ export interface IMovimiento {
 }
 
 export const useMovimientosStore = defineStore('movimientos', () => {
-    // 1. Estado base (La fuente única de la verdad)
+    // 1. Estado base
     const saved = localStorage.getItem('gestio_historial');
     const historial = ref<IMovimiento[]>(saved ? JSON.parse(saved) : []);
 
-    // 2. Estado de Filtro (Solo afecta a la vista de Auditoría)
+    // 2. Estado de Filtro
     const filtroTipo = ref<'Todos' | 'Ingreso' | 'Egreso'>('Todos');
 
     function sincronizar() {
@@ -32,22 +33,41 @@ export const useMovimientosStore = defineStore('movimientos', () => {
         sincronizar();
     }
 
-    // 3. Setters para filtros
     function establecerFiltro(tipo: 'Todos' | 'Ingreso' | 'Egreso') {
         filtroTipo.value = tipo;
     }
 
-    // 4. Computados para Dashboard (IGNORAN el filtro)
+    // 3. Computados
     const totalIngresos = computed(() => historial.value.filter(m => m.tipo === 'Ingreso').reduce((sum, m) => sum + m.monto, 0));
     const totalEgresos = computed(() => historial.value.filter(m => m.tipo === 'Egreso').reduce((sum, m) => sum + m.monto, 0));
     const saldo = computed(() => totalIngresos.value - totalEgresos.value);
 
-    // 5. Computado para Auditoría (RESPETA el filtro)
     const historialFiltrado = computed(() => {
         if (filtroTipo.value === 'Todos') return historial.value;
         return historial.value.filter(m => m.tipo === filtroTipo.value);
     });
 
+    // 4. Acción de descarga (CORREGIDA)
+    function descargarAuditoria() {
+        const datos = historialFiltrado.value.map(item => ({
+            "FECHA": new Date(item.fecha).toLocaleDateString(),
+            "CATEGORÍA": item.categoria,
+            "DESCRIPCIÓN": item.descripcion,
+            "TIPO": item.tipo,
+            "MONTO": item.monto
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.sheet_add_aoa(worksheet, [["Reporte Financiero - Gestio"], ["Fecha:", new Date().toLocaleDateString()]], { origin: "A1" });
+        XLSX.utils.sheet_add_json(worksheet, datos, { origin: "A4" });
+        worksheet['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 12 }, { wch: 15 }];
+        
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Auditoria");
+        XLSX.writeFile(workbook, "Reporte_Gestio.xlsx");
+    }
+
+    // EL RETURN DEBE IR AL FINAL DE LA FUNCIÓN PRINCIPAL
     return {
         historial,
         historialFiltrado,
@@ -57,6 +77,7 @@ export const useMovimientosStore = defineStore('movimientos', () => {
         saldo,
         agregarMovimiento,
         limpiarHistorial,
-        establecerFiltro
+        establecerFiltro,
+        descargarAuditoria // Ya está incluida para ser usada en tus vistas
     };
 });

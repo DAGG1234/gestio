@@ -164,6 +164,15 @@ watch(() => uiStore.filtroTipo, () => {
             <!-- Tabla de Historial -->
             <div
                 class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto max-h-125 overflow-y-auto custom-scrollbar">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-700">Historial Detallado</h2>
+
+                    <button @click="movStore.descargarAuditoria()"
+                        class="flex items-center gap-2 bg-[#0332fd] hover:bg-blue-800 text-white text-sm font-medium py-2 px-4 rounded-xl shadow-md transition-all active:scale-95">
+                        Descargar Reporte
+                    </button>
+                </div>
+
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-gray-400 text-xs uppercase sticky top-0 z-10">
                         <tr>
