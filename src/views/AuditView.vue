@@ -8,7 +8,7 @@ import AuditTransactionTable from '@/components/audit/AuditTransactionTable.vue'
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
     <!-- Cabecera Institucional -->
     <AuditHeader />
 

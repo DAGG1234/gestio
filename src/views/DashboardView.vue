@@ -144,7 +144,8 @@ const handleDeleteTransaction = (id: string, event: Event) => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full overflow-hidden">
+  <!-- Se añadió 'bg-slate-50' para que el fondo general cubra el espacio vacío -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
     
     <!-- HEADER EJECUTIVO MINIMALISTA -->
     <header class="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 shadow-2xs gap-3">

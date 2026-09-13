@@ -72,9 +72,71 @@ const openContributeModal = (savingId: string) => {
   showContributeModal.value = true
 }
 
+const handleNewSavingInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  let val = target.value
+
+  if (val === '') {
+    newSavingTarget.value = null
+    savingFormError.value = ''
+    return
+  }
+
+  const num = parseFloat(val)
+  const MAX_LIMIT = 999999999.99
+
+  if (num > MAX_LIMIT) {
+    savingFormError.value = `El monto máximo permitido es ${MAX_LIMIT.toLocaleString()}`
+    newSavingTarget.value = MAX_LIMIT
+    return
+  }
+
+  if (val.includes('.')) {
+    const parts = val.split('.')
+    if (parts[1] && parts[1].length > 2) {
+      newSavingTarget.value = parseFloat(Number(val).toFixed(2))
+      return
+    }
+  }
+
+  savingFormError.value = ''
+  newSavingTarget.value = num
+}
+
+const handleContributeAmountInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  let val = target.value
+
+  if (val === '') {
+    contributeAmount.value = null
+    contributeError.value = ''
+    return
+  }
+
+  const num = parseFloat(val)
+  const MAX_LIMIT = 999999999.99
+
+  if (num > MAX_LIMIT) {
+    contributeError.value = `El monto máximo permitido es ${MAX_LIMIT.toLocaleString()}`
+    contributeAmount.value = MAX_LIMIT
+    return
+  }
+
+  if (val.includes('.')) {
+    const parts = val.split('.')
+    if (parts[1] && parts[1].length > 2) {
+      contributeAmount.value = parseFloat(Number(val).toFixed(2))
+      return
+    }
+  }
+
+  contributeError.value = ''
+  contributeAmount.value = num
+}
+
 // Guardar nuevo ahorro (REGLA: Sin validación de saldo disponible, crear meta no gasta dinero)
 const handleCreateSaving = () => {
-  if (!newSavingTitle.value.trim() || !newSavingTarget.value || newSavingTarget.value <= 0) {
+  if (!newSavingTitle.value.trim() || newSavingTarget.value === null || newSavingTarget.value <= 0) {
     savingFormError.value = 'Por favor, completa todos los campos con valores válidos.'
     return
   }
@@ -126,7 +188,7 @@ const handleContribute = () => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full overflow-hidden">
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
     
     <!-- HEADER -->
     <header class="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 shadow-2xs gap-3">
@@ -135,7 +197,7 @@ const handleContribute = () => {
           Ahorros y Capital
         </h1>
         <p class="text-xs sm:text-sm text-emerald-600 font-semibold truncate mt-0.5">
-          Bienvenido a tus ahorros, {{ username }}
+          Resguardo financiero, {{ username }}
         </p>
       </div>
     </header>
@@ -147,7 +209,7 @@ const handleContribute = () => {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         
         <!-- Tarjeta Principal de Ahorros con Selector de Divisa -->
-        <div class="lg:col-span-2 bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white p-5 sm:p-6 rounded-2xl shadow-md flex flex-col justify-between relative overflow-hidden">
+        <div class="lg:col-span-2 bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-950 text-white p-5 sm:p-6 rounded-2xl shadow-md flex flex-col justify-between relative overflow-hidden">
           <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
           
           <div class="relative z-10">
@@ -158,13 +220,13 @@ const handleContribute = () => {
               <div class="flex items-center bg-white/10 rounded-lg p-0.5 border border-white/20">
                 <button
                   @click="savingsDisplayCurrency = 'USD'"
-                  :class="['px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer', savingsDisplayCurrency === 'USD' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-100 hover:text-white']"
+                  :class="['px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer', savingsDisplayCurrency === 'USD' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-100 hover:text-white']"
                 >
                   USD ($)
                 </button>
                 <button
                   @click="savingsDisplayCurrency = 'VES'"
-                  :class="['px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer', savingsDisplayCurrency === 'VES' ? 'bg-white text-emerald-800 shadow-sm' : 'text-emerald-100 hover:text-white']"
+                  :class="['px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer', savingsDisplayCurrency === 'VES' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-100 hover:text-white']"
                 >
                   VES (Bs.)
                 </button>
@@ -294,7 +356,7 @@ const handleContribute = () => {
                 <p class="font-bold text-slate-800 truncate">
                   Aporte a ahorro &bull; <span class="text-emerald-700">{{ financeStore.savingGoals.find(g => g.id === contrib.goalId)?.title || 'Ahorro eliminado' }}</span>
                 </p>
-                <p class="text-[10px] text-slate-400">{{ new Date(contrib.date).toLocaleDateString('es-VE', { dateStyle: 'medium' }) }}</p>
+                <p class="text-[10px] text-slate-400">{{ contrib.date.split('T')[0].split('-').reverse().join('/') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
@@ -333,6 +395,7 @@ const handleContribute = () => {
             <input
               v-model="newSavingTitle"
               type="text"
+              maxlength="50"
               placeholder="Ej. Fondo de emergencia, Inversión..."
               class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-600"
               required
@@ -352,12 +415,17 @@ const handleContribute = () => {
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-bold text-slate-600">Monto Objetivo</label>
+              <div class="flex justify-between items-center">
+                <label class="block text-xs font-bold text-slate-600">Monto Objetivo</label>
+                <span class="text-[9px] text-slate-400">Máx: 999M</span>
+              </div>
               <input
-                v-model.number="newSavingTarget"
+                :value="newSavingTarget"
+                @input="handleNewSavingInput"
                 type="number"
                 step="0.01"
                 min="0.01"
+                max="999999999.99"
                 placeholder="0.00"
                 class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-600"
                 required
@@ -398,12 +466,17 @@ const handleContribute = () => {
 
         <form @submit.prevent="handleContribute" class="space-y-3.5">
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-slate-600">Monto a Abonar (en Bolívares - Bs.)</label>
+            <div class="flex justify-between items-center">
+              <label class="block text-xs font-bold text-slate-600">Monto a Abonar (en Bolívares - Bs.)</label>
+              <span class="text-[9px] text-slate-400">Máx: 999M</span>
+            </div>
             <input
-              v-model.number="contributeAmount"
+              :value="contributeAmount"
+              @input="handleContributeAmountInput"
               type="number"
               step="0.01"
               min="0.01"
+              max="999999999.99"
               placeholder="0.00"
               class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-600"
               required

@@ -26,7 +26,7 @@ const debtFormError = ref('')
 const payAmount = ref<number | null>(null)
 const payError = ref('')
 
-// Selector de moneda específico para la tarjeta de balance de deudas ($ o Bs)
+// Selector de moneda específico para la tarjeta de balance de deudas ($ or Bs)
 const debtsDisplayCurrency = ref<'USD' | 'VES'>('USD')
 
 // Nombre formateado del usuario
@@ -188,7 +188,7 @@ const handlePayDebt = () => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full overflow-hidden">
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
     
     <!-- HEADER -->
     <header class="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 shadow-2xs gap-3">
