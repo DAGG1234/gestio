@@ -22,9 +22,9 @@ onMounted(() => {
   }
 })
 
-// Nombre formateado del usuario
+// Nombre de usuario obtenido directamente de la base de datos (authStore.user.username)
 const username = computed(() => {
-  const rawName = authStore.user?.username || 'Daniel'
+  const rawName = authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Usuario'
   return rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
 })
 
@@ -76,7 +76,7 @@ const dynamicAdvice = computed(() => {
   if (hasNoTransactions.value) {
     return {
       title: 'Comienza tu Registro',
-      message: `¡Hola ${username}! Todavía no tienes ingresos ni egresos registrados. Comienza a agregarlos para que ${name} pueda evaluar y cuidar de tus finanzas.`
+      message: `¡Hola ${username.value}! Todavía no tienes ingresos ni egresos registrados. Comienza a agregarlos para que ${name} pueda evaluar y cuidar de tus finanzas.`
     }
   }
 
@@ -85,27 +85,27 @@ const dynamicAdvice = computed(() => {
   if (hp >= 90) {
     return {
       title: 'Excelente Gestión',
-      message: `¡Guau ${username}! Tus finanzas están impecables. Tienes un margen de ahorro excelente y ${name} está saltando de la alegría. ¡Sigue así!`
+      message: `¡Guau ${username.value}! Tus finanzas están impecables. Tienes un margen de ahorro excelente y ${name} está saltando de la alegría. ¡Sigue así!`
     }
   } else if (hp >= 70) {
     return {
       title: 'Muy Buen Ritmo',
-      message: `Estás administrando muy bien tus ingresos. Los gastos están bajo control y ${name} se siente seguro y feliz a tu lado, ${username}.`
+      message: `Estás administrando muy bien tus ingresos. Los gastos están bajo control y ${name} se siente seguro y feliz a tu lado, ${username.value}.`
     }
   } else if (hp >= 50) {
     return {
       title: 'Finanzas Estables',
-      message: `Vas por buen camino ${username}, pero mantén el ojo en los gastos hormiga. ${name} vigila de cerca el presupuesto para evitar sorpresas.`
+      message: `Vas por buen camino ${username.value}, pero mantén el ojo en los gastos hormiga. ${name} vigila de cerca el presupuesto para evitar sorpresas.`
     }
   } else if (hp >= 30) {
     return {
       title: 'Zona de Precaución',
-      message: `¡Cuidado ${username}, ${name} está un poco triste! Los egresos están creciendo bastante en relación a tus ingresos. Es hora de recortar gastos.`
+      message: `¡Cuidado ${username.value}, ${name} está un poco triste! Los egresos están creciendo bastante en relación a tus ingresos. Es hora de recortar gastos.`
     }
   } else {
     return {
       title: 'Alerta Roja Financiera',
-      message: `¡Tus gastos han superado el límite saludable, ${username}! ${name} está muy preocupado. Tus finanzas necesitan un ajuste de emergencia.`
+      message: `¡Tus gastos han superado el límite saludable, ${username.value}! ${name} está muy preocupado. Tus finanzas necesitan un ajuste de emergencia.`
     }
   }
 })
@@ -120,7 +120,6 @@ const dynamicAdvice = computed(() => {
         <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
           Salud Financiera
         </h1>
-        <!-- Subtítulo cambiado a un color neutro/corporativo elegante (text-slate-500) que combina con el estilo general -->
         <p class="text-xs sm:text-sm text-slate-500 font-medium truncate mt-0.5">
           Compañero y bienestar de tu capital, {{ username }}
         </p>
