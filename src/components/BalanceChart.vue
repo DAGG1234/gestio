@@ -2,7 +2,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useCurrencyToggle } from '@/stores/useCurrencyToggle'
-import { useExchangeRateStore } from '@/stores/useExchangeRateStore'
 
 const props = defineProps<{
   income: number
@@ -10,31 +9,19 @@ const props = defineProps<{
 }>()
 
 const currencyStore = useCurrencyToggle()
-const exchangeRateStore = useExchangeRateStore()
 
 const hoveredSegment = ref<'income' | 'expense' | null>(null)
 
-// Tasa actual de conversión
-const rate = computed(() => exchangeRateStore.rate || 1)
-
-// Montos convertidos dinámicamente según la moneda activa (VES o USD)
-const convertedIncome = computed(() => {
-  return currencyStore.currentCurrency === 'USD' ? (rate.value > 0 ? props.income / rate.value : 0) : props.income
-})
-
-const convertedExpense = computed(() => {
-  return currencyStore.currentCurrency === 'USD' ? (rate.value > 0 ? props.expense / rate.value : 0) : props.expense
-})
-
-const convertedTotal = computed(() => convertedIncome.value + convertedExpense.value)
+// Los valores ya vienen adaptados desde el padre según la moneda activa
+const total = computed(() => props.income + props.expense)
 
 const incomePercentage = computed(() => {
-  if (convertedTotal.value === 0) return 50
-  return (convertedIncome.value / convertedTotal.value) * 100
+  if (total.value === 0) return 50
+  return (props.income / total.value) * 100
 })
 
 const conicGradientStyle = computed(() => {
-  if (convertedTotal.value === 0) {
+  if (total.value === 0) {
     return { background: '#e2e8f0' }
   }
   const incomeAngle = (incomePercentage.value / 100) * 360
@@ -54,11 +41,11 @@ const centerTitle = computed(() => {
   return 'Neto'
 })
 
-// Cifra central adaptada usando los valores convertidos
+// Cifra central adaptada usando los valores directos de las props
 const centerDisplayValue = computed(() => {
-  if (hoveredSegment.value === 'income') return currencyStore.formatMoney(convertedIncome.value)
-  if (hoveredSegment.value === 'expense') return currencyStore.formatMoney(convertedExpense.value)
-  return currencyStore.formatMoney(convertedIncome.value - convertedExpense.value)
+  if (hoveredSegment.value === 'income') return currencyStore.formatMoney(props.income)
+  if (hoveredSegment.value === 'expense') return currencyStore.formatMoney(props.expense)
+  return currencyStore.formatMoney(props.income - props.expense)
 })
 </script>
 
@@ -80,7 +67,7 @@ const centerDisplayValue = computed(() => {
         :style="conicGradientStyle"
         @mouseleave="hoveredSegment = null"
       >
-        <!-- Círculo interior con etiqueta sutil y cifra convertida -->
+        <!-- Círculo interior con etiqueta sutil y cifra -->
         <div class="absolute inset-4 sm:inset-4.5 bg-white rounded-full flex flex-col items-center justify-center shadow-xs px-1 text-center transition-transform duration-300">
           <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">
             {{ centerTitle }}
@@ -91,7 +78,7 @@ const centerDisplayValue = computed(() => {
         </div>
       </div>
 
-      <!-- Leyendas laterales interactivas con valores convertidos -->
+      <!-- Leyendas laterales interactivas -->
       <div class="flex flex-col gap-2.5 w-full sm:w-auto">
         <!-- Ficha de Ingresos -->
         <div 
@@ -106,7 +93,7 @@ const centerDisplayValue = computed(() => {
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 transition-transform" :class="hoveredSegment === 'income' ? 'scale-125 ring-2 ring-emerald-200' : ''"></span>
             <span class="text-xs font-medium text-slate-600">Ingresos</span>
           </div>
-          <span class="text-xs font-bold text-emerald-600">{{ currencyStore.formatMoney(convertedIncome) }}</span>
+          <span class="text-xs font-bold text-emerald-600">{{ currencyStore.formatMoney(props.income) }}</span>
         </div>
 
         <!-- Ficha de Egresos -->
@@ -122,7 +109,7 @@ const centerDisplayValue = computed(() => {
             <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0 transition-transform" :class="hoveredSegment === 'expense' ? 'scale-125 ring-2 ring-rose-200' : ''"></span>
             <span class="text-xs font-medium text-slate-600">Egresos</span>
           </div>
-          <span class="text-xs font-bold text-rose-600">{{ currencyStore.formatMoney(convertedExpense) }}</span>
+          <span class="text-xs font-bold text-rose-600">{{ currencyStore.formatMoney(props.expense) }}</span>
         </div>
       </div>
 
@@ -131,7 +118,7 @@ const centerDisplayValue = computed(() => {
     <!-- Pie de tarjeta sutil -->
     <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-medium">
       <span>Proporción de movimientos</span>
-      <span>Total: {{ currencyStore.formatMoney(convertedTotal) }}</span>
+      <span>Total: {{ currencyStore.formatMoney(total) }}</span>
     </div>
   </div>
 </template>
