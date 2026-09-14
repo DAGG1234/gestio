@@ -54,8 +54,8 @@ export const useAuditingStore = defineStore('auditing', () => {
   // Transacciones filtradas específicamente por el selector de métrica de la gráfica
   const chartFilteredTransactions = computed(() => {
     return filteredTransactions.value.filter(t => {
-      const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
-      const effectiveType = isDebt ? 'expense' : t.type
+      const isDebtTransaction = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
+      const effectiveType = isDebtTransaction ? 'expense' : t.type
 
       if (chartMetricFilter.value === 'income') return effectiveType === 'income'
       if (chartMetricFilter.value === 'expense') return effectiveType === 'expense'
@@ -212,7 +212,6 @@ export const useAuditingStore = defineStore('auditing', () => {
     // Insertar cada transacción con su fecha en el resumen
     filteredTransactions.value.forEach((t, index) => {
       const formattedDate = new Date(t.date).toLocaleDateString()
-      const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
       const hRow = summarySheet.addRow([
         formattedDate,
         t.type === 'income' ? 'Ingreso' : 'Egreso',
