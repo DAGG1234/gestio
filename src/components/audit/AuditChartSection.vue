@@ -23,7 +23,10 @@ const categoryColors = [
 const availableCategories = computed(() => {
   const cats = new Set<string>()
   auditStore.filteredTransactions.forEach(t => {
-    if (auditStore.chartMetricFilter === 'all' || t.type === auditStore.chartMetricFilter) {
+    const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
+    const effectiveType = isDebt ? 'expense' : t.type
+
+    if (auditStore.chartMetricFilter === 'all' || effectiveType === auditStore.chartMetricFilter) {
       cats.add(t.category)
     }
   })
@@ -33,13 +36,16 @@ const availableCategories = computed(() => {
 // 2. Transacciones completamente filtradas (Métrica + Categoría específica)
 const fullyFilteredTransactions = computed(() => {
   return auditStore.filteredTransactions.filter(t => {
-    const matchesMetric = auditStore.chartMetricFilter === 'all' || t.type === auditStore.chartMetricFilter
+    const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
+    const effectiveType = isDebt ? 'expense' : t.type
+
+    const matchesMetric = auditStore.chartMetricFilter === 'all' || effectiveType === auditStore.chartMetricFilter
     const matchesCategory = selectedCategoryFilter.value === 'all' || t.category === selectedCategoryFilter.value
     return matchesMetric && matchesCategory
   })
 })
 
-// Totales recalculados basados en los filtros activos
+// Totales recalculados basados en los filtros activos (incluyendo deudas como egresos)
 const activeTotalIncome = computed(() => {
   return fullyFilteredTransactions.value
     .filter(t => t.type === 'income')
@@ -48,12 +54,12 @@ const activeTotalIncome = computed(() => {
 
 const activeTotalExpense = computed(() => {
   return fullyFilteredTransactions.value
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'expense' || t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas')
     .reduce((acc, t) => acc + t.amount, 0)
 })
 
 const activeTotalVolume = computed(() => {
-  return fullyFilteredTransactions.value.reduce((acc, t) => acc + t.amount, 0)
+  return activeTotalIncome.value + activeTotalExpense.value
 })
 
 // Porcentajes para la vista de Ingresos vs Egresos (cuando está en 'all' sin categoría específica)
@@ -71,7 +77,7 @@ const incomeStrokeDasharray = computed(() => {
   return `${inc} ${100 - inc}`
 })
 
-// 3. Desglose avanzado por categoría (con colores propios para cuando se requiera)
+// 3. Desglose avanzado por categoría (asegurando que las deudas cuenten como egreso)
 const categoryBreakdown = computed(() => {
   const map: Record<string, { income: number; expense: number; count: number; total: number }> = {}
   
@@ -79,12 +85,16 @@ const categoryBreakdown = computed(() => {
     if (!map[t.category]) {
       map[t.category] = { income: 0, expense: 0, count: 0, total: 0 }
     }
+    
+    const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
+    
     if (t.type === 'income') {
       map[t.category].income += t.amount
-    } else {
+      map[t.category].total += t.amount
+    } else if (t.type === 'expense' || isDebt) {
       map[t.category].expense += t.amount
+      map[t.category].total += t.amount
     }
-    map[t.category].total += t.amount
     map[t.category].count += 1
   })
 

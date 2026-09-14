@@ -54,13 +54,16 @@ export const useAuditingStore = defineStore('auditing', () => {
   // Transacciones filtradas específicamente por el selector de métrica de la gráfica
   const chartFilteredTransactions = computed(() => {
     return filteredTransactions.value.filter(t => {
-      if (chartMetricFilter.value === 'income') return t.type === 'income'
-      if (chartMetricFilter.value === 'expense') return t.type === 'expense'
+      const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
+      const effectiveType = isDebt ? 'expense' : t.type
+
+      if (chartMetricFilter.value === 'income') return effectiveType === 'income'
+      if (chartMetricFilter.value === 'expense') return effectiveType === 'expense'
       return true
     })
   })
 
-  // KPIs Financieros del periodo
+  // KPIs Financieros del periodo (Incluyendo deudas y pagos de deudas como egresos)
   const totalIncome = computed(() => {
     return filteredTransactions.value
       .filter(t => t.type === 'income')
@@ -69,7 +72,7 @@ export const useAuditingStore = defineStore('auditing', () => {
 
   const totalExpense = computed(() => {
     return filteredTransactions.value
-      .filter(t => t.type === 'expense')
+      .filter(t => t.type === 'expense' || t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas')
       .reduce((acc, t) => acc + t.amount, 0)
   })
 
@@ -209,6 +212,7 @@ export const useAuditingStore = defineStore('auditing', () => {
     // Insertar cada transacción con su fecha en el resumen
     filteredTransactions.value.forEach((t, index) => {
       const formattedDate = new Date(t.date).toLocaleDateString()
+      const isDebt = t.type === 'debt_payment' || t.category.toLowerCase() === 'deudas'
       const hRow = summarySheet.addRow([
         formattedDate,
         t.type === 'income' ? 'Ingreso' : 'Egreso',

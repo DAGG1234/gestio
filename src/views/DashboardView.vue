@@ -7,6 +7,7 @@ import { useCategoryStore } from '@/stores/useCategoryStore'
 import { useExchangeRateStore } from '@/stores/useExchangeRateStore'
 import { useCurrencyToggle } from '@/stores/useCurrencyToggle'
 import IncomeExpenseChart from '@/components/BalanceChart.vue'
+import FeedbackModal from '@/components/dashboard/FeedbackModal.vue'
 
 const authStore = useAuthStore()
 const financeStore = useFinanceStore()
@@ -16,6 +17,7 @@ const currencyStore = useCurrencyToggle()
 
 const activeModal = ref<'income' | 'expense' | null>(null)
 const showAllModal = ref<boolean>(false)
+const showFeedbackModal = ref<boolean>(false)
 const category = ref<string>('')
 const description = ref<string>('')
 const amount = ref<number | null>(null)
@@ -39,6 +41,17 @@ onMounted(async () => {
   exchangeRateStore.fetchExchangeRate()
   // Carga los datos financieros y transacciones desde Supabase al montar la vista
   await financeStore.fetchAllData()
+
+  // Comprobar si el usuario actual ya envió feedback en este equipo
+  if (authStore.user?.id) {
+    const hasGivenFeedback = localStorage.getItem(`gestio_feedback_${authStore.user.id}`)
+    if (!hasGivenFeedback) {
+      // Pequeño delay de cortesía al entrar al dashboard para mostrar el modal
+      setTimeout(() => {
+        showFeedbackModal.value = true
+      }, 1000)
+    }
+  }
 })
 
 const recentTransactions = computed(() => {
@@ -431,6 +444,13 @@ const handleDeleteTransaction = (id: string, event: Event) => {
         </div>
       </div>
     </div>
+
+    <!-- MODAL DE FEEDBACK AUTOMÁTICO -->
+    <FeedbackModal 
+      v-if="showFeedbackModal" 
+      @submitted="showFeedbackModal = false" 
+    />
+
   </div>
 </template>
 

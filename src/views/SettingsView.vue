@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/useAuthStore'
 import UserEditCard from '@/components/settings/UserEditCard.vue'
 import PreferencesCard from '@/components/settings/PreferencesCard.vue'
+import SupportCard from '@/components/settings/SupportCard.vue'
+import ReviewsCard from '@/components/settings/ReviewsCard.vue' // <--- Importado correctamente
 import DangerZoneCard from '@/components/settings/DangerZoneCard.vue'
 
 const router = useRouter()
@@ -53,6 +55,8 @@ const handleLogout = async () => {
       <div class="max-w-4xl mx-auto space-y-5 sm:space-y-6 pb-20">
         <UserEditCard />
         <PreferencesCard />
+        <SupportCard />
+        <ReviewsCard /> <!-- <--- Integrado en la vista -->
         <DangerZoneCard />
       </div>
     </div>

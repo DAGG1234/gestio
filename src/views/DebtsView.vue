@@ -397,7 +397,7 @@ const handlePayDebt = () => {
               type="text"
               maxlength="50"
               placeholder="Ej. Préstamo bancario, Tarjeta de crédito..."
-              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-rose-600"
+              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-600"
               required
             />
           </div>
@@ -407,10 +407,10 @@ const handlePayDebt = () => {
               <label class="block text-xs font-bold text-slate-600">Moneda</label>
               <select
                 v-model="newDebtCurrency"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-rose-600"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-rose-600"
               >
-                <option value="USD">Dólares ($)</option>
-                <option value="VES">Bolívares (Bs.)</option>
+                <option value="USD" class="text-slate-900 font-bold">Dólares ($)</option>
+                <option value="VES" class="text-slate-900 font-bold">Bolívares (Bs.)</option>
               </select>
             </div>
 
@@ -427,7 +427,7 @@ const handlePayDebt = () => {
                 min="0.01"
                 max="999999999.99"
                 placeholder="0.00"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-rose-600"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-600"
                 required
               />
             </div>
@@ -478,7 +478,7 @@ const handlePayDebt = () => {
               min="0.01"
               max="999999999.99"
               placeholder="0.00"
-              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-rose-600"
+              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-600"
               required
             />
           </div>

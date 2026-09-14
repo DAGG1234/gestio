@@ -15,6 +15,10 @@ const emit = defineEmits<{
 const usdAmount = ref<number | null>(1)
 const bsfAmount = ref<number | null>(props.rate)
 
+// Estados de feedback para los botones de copia
+const copiedUsd = ref(false)
+const copiedBsf = ref(false)
+
 const quickPresets = [5, 10, 20, 50, 100]
 
 // Asegurar sincronización inicial y reactiva ante cambios de tasa
@@ -51,8 +55,20 @@ const setPreset = (val: number) => {
   handleUsdInput()
 }
 
-const copyToClipboard = (text: string) => {
+const copyToClipboard = (text: string, type: 'usd' | 'bsf') => {
   navigator.clipboard.writeText(text)
+  
+  if (type === 'usd') {
+    copiedUsd.value = true
+    setTimeout(() => {
+      copiedUsd.value = false
+    }, 2000)
+  } else {
+    copiedBsf.value = true
+    setTimeout(() => {
+      copiedBsf.value = false
+    }, 2000)
+  }
 }
 </script>
 
@@ -106,10 +122,11 @@ const copyToClipboard = (text: string) => {
           <div class="flex items-center justify-between">
             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Monto en Dólares</label>
             <button 
-              @click="usdAmount !== null && copyToClipboard(usdAmount.toString())"
-              class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase cursor-pointer"
+              @click="usdAmount !== null && copyToClipboard(usdAmount.toString(), 'usd')"
+              class="text-[10px] font-bold uppercase cursor-pointer transition-colors"
+              :class="copiedUsd ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md' : 'text-emerald-600 hover:text-emerald-700'"
             >
-              Copiar
+              {{ copiedUsd ? '✓ ¡Copiado!' : 'Copiar' }}
             </button>
           </div>
           <div class="relative">
@@ -131,10 +148,11 @@ const copyToClipboard = (text: string) => {
           <div class="flex items-center justify-between">
             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Monto en Bolívares</label>
             <button 
-              @click="bsfAmount !== null && copyToClipboard(bsfAmount.toString())"
-              class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase cursor-pointer"
+              @click="bsfAmount !== null && copyToClipboard(bsfAmount.toString(), 'bsf')"
+              class="text-[10px] font-bold uppercase cursor-pointer transition-colors"
+              :class="copiedBsf ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md' : 'text-emerald-600 hover:text-emerald-700'"
             >
-              Copiar
+              {{ copiedBsf ? '✓ ¡Copiado!' : 'Copiar' }}
             </button>
           </div>
           <div class="relative">
