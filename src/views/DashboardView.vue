@@ -1,6 +1,7 @@
 <!-- src/views/DashboardView.vue -->
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { supabase } from '@/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useFinanceStore } from '@/stores/useFinanceStore'
 import { useCategoryStore } from '@/stores/useCategoryStore'
@@ -8,6 +9,7 @@ import { useExchangeRateStore } from '@/stores/useExchangeRateStore'
 import { useCurrencyToggle } from '@/stores/useCurrencyToggle'
 import IncomeExpenseChart from '@/components/BalanceChart.vue'
 import FeedbackModal from '@/components/dashboard/FeedbackModal.vue'
+import NotificationBell from '@/components/dashboard/NotificationBell.vue'
 
 const authStore = useAuthStore()
 const financeStore = useFinanceStore()
@@ -42,15 +44,36 @@ onMounted(async () => {
   // Carga los datos financieros y transacciones desde Supabase al montar la vista
   await financeStore.fetchAllData()
 
-  // Comprobar si el usuario actual ya envió feedback en este equipo
-  if (authStore.user?.id) {
-    const hasGivenFeedback = localStorage.getItem(`gestio_feedback_${authStore.user.id}`)
-    if (!hasGivenFeedback) {
-      // Pequeño delay de cortesía al entrar al dashboard para mostrar el modal
-      setTimeout(() => {
-        showFeedbackModal.value = true
-      }, 1000)
+  // Comprobar las reglas de negocio en Supabase (24 horas + si ya envió feedback)
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.id && user.created_at) {
+      
+      // 1. Verificar directamente en Supabase si este usuario ya dio feedback en la base de datos
+      const { data: existingFeedback, error: dbError } = await supabase
+        .from('user_feedback')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (dbError) throw dbError
+
+      // Si ya existe un registro en la base de datos para este usuario, no hacemos nada (nunca vuelve a salir)
+      if (existingFeedback) return
+
+      // 2. Validar que hayan pasado más de 24 horas desde su registro en Supabase
+      const createdAtTime = new Date(user.created_at).getTime()
+      const currentTime = new Date().getTime()
+      const twentyFourHours = 86400000 // 24 horas en milisegundos
+
+      if (currentTime - createdAtTime >= twentyFourHours) {
+        setTimeout(() => {
+          showFeedbackModal.value = true
+        }, 1000)
+      }
     }
+  } catch (error) {
+    console.error('Error al validar el estado del feedback del usuario:', error)
   }
 })
 
@@ -173,14 +196,17 @@ const handleDeleteTransaction = (id: string, event: Event) => {
         </p>
       </div>
 
-      <!-- Controles de Divisa y Tasa BCV -->
+      <!-- Controles de Divisa, Tasa BCV y Campanita de Notificaciones -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <button
           @click="currencyStore.toggleCurrency()"
           class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-slate-200 text-[11px] sm:text-xs font-extrabold text-slate-700 transition-all cursor-pointer active:scale-95 shadow-2xs"
           :title="currencyStore.currentCurrency === 'VES' ? 'Cambiar a Dólares' : 'Cambiar a Bolívares'"
         >
-          <span class="text-xs">{{ currencyStore.currentCurrency === 'VES' ? '🇻🇪' : '🇺🇸' }}</span>
+          <!-- Icono SVG en lugar de emojis de banderas -->
+          <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+          </svg>
           <div class="flex items-center gap-1">
             <span class="tracking-tight">{{ currencyStore.currentCurrency === 'VES' ? 'Bs.' : 'USD' }}</span>
             <span class="text-[10px] text-slate-400 font-medium">
@@ -196,6 +222,9 @@ const handleDeleteTransaction = (id: string, event: Event) => {
             {{ exchangeRateStore.loading ? '...' : `${exchangeRateStore.rate.toFixed(2)}` }}
           </span>
         </div>
+
+        <!-- Componente de la Campanita de Notificaciones -->
+        <NotificationBell />
       </div>
     </header>
 

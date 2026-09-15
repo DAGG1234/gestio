@@ -1,6 +1,6 @@
 <!-- src/components/dashboard/FeedbackModal.vue -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue' // <-- Añadimos 'computed'
 import { supabase } from '@/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import GestioLogo from '@/assets/gestioIco.svg'
@@ -10,9 +10,14 @@ const authStore = useAuthStore()
 
 const rating = ref<number>(4.5)
 const hoverRating = ref<number>(0)
-const comment = ref<string>('Me gusta ya que es un sistema dedicado a ayudarme a llevar el control de mis finanzas, puede seguir mejorando y creciendo pero hoy por hoy esta muy excelente')
+const comment = ref<string>('')
 const loading = ref<boolean>(false)
 const errorMessage = ref<string>('')
+
+// Validación computada para asegurar que haya estrellas y comentario válido
+const isFormValid = computed(() => {
+  return rating.value > 0 && comment.value.trim().length > 0
+})
 
 const calculateRatingFromMouseEvent = (event: MouseEvent, starIndex: number) => {
   const target = event.currentTarget as HTMLElement
@@ -30,13 +35,9 @@ const handleClick = (event: MouseEvent, starIndex: number) => {
 }
 
 const submitFeedback = async () => {
-  if (rating.value === 0) {
-    errorMessage.value = 'Por favor, selecciona una calificación de estrellas.'
-    return
-  }
-
-  if (!comment.value.trim()) {
-    errorMessage.value = 'Por favor, escribe un breve comentario sobre tu experiencia.'
+  // Doble validación de seguridad por si intentan saltarse el botón
+  if (!isFormValid.value) {
+    errorMessage.value = 'Por favor, selecciona una calificación y escribe un comentario.'
     return
   }
 
@@ -62,7 +63,6 @@ const submitFeedback = async () => {
 
     if (error) throw error
 
-    localStorage.setItem(`gestio_feedback_${user.id}`, 'true')
     emit('submitted')
   } catch (err: any) {
     console.error('Error al enviar feedback:', err)
@@ -129,8 +129,13 @@ const submitFeedback = async () => {
       <div class="flex items-center justify-end pt-2">
         <button
           @click="submitFeedback"
-          :disabled="loading"
-          class="w-full bg-[#0b4d6c] hover:bg-[#093d56] text-white text-xs font-semibold px-6 py-3.5 rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+          :disabled="loading || !isFormValid"
+          :class="[
+            'w-full text-xs font-semibold px-6 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2',
+            !isFormValid || loading 
+              ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
+              : 'bg-[#0b4d6c] hover:bg-[#093d56] text-white cursor-pointer'
+          ]"
         >
           <span v-if="loading">Enviando opinión...</span>
           <span v-else>Publicar reseña</span>
